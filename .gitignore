@@ -1,0 +1,17 @@
+# Ignorar o arquivo de configuração com as chaves secretas
+config.js
+
+# Arquivos de dependências (boa prática, caso use no futuro)
+node_modules/
+
+# Arquivos de ambiente
+.env
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Arquivos de sistema operacional
+.DS_Store
+Thumbs.db
