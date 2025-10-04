@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
@@ -6,15 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arenza Moda Íntima - Desejo e Elegância</title>
 
-    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
 
-    <!-- Supabase Client Library -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
-    <!-- Stylesheet -->
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
@@ -36,7 +32,6 @@
     </header>
 
     <main>
-        <!-- Seção Hero -->
         <section id="hero" class="fade-in">
             <div class="hero-content">
                 <h1>Arenza Moda Íntima</h1>
@@ -45,18 +40,15 @@
             </div>
         </section>
 
-        <!-- Seção de Produtos -->
         <section id="products">
             <div class="container">
                 <h2 class="section-title fade-in">Coleção Exclusiva</h2>
                 <p class="section-subtitle fade-in">Peças desenhadas para revelar a sua melhor versão.</p>
                 <div id="product-grid" class="product-grid">
-                    <!-- Produtos serão injetados aqui -->
-                </div>
+                    </div>
             </div>
         </section>
 
-        <!-- Painel de Gerenciamento de Produtos (Admin) -->
         <section id="admin-panel" class="hidden">
             <div class="container">
                 <h2 class="section-title fade-in">Gerenciar Produtos</h2>
@@ -81,18 +73,15 @@
             </div>
         </section>
         
-        <!-- Seção de Depoimentos -->
         <section id="testimonials">
             <div class="container">
                  <div id="testimonial-carousel" class="testimonial-carousel">
-                    <!-- Depoimentos serão injetados aqui -->
-                 </div>
+                    </div>
             </div>
         </section>
 
     </main>
     
-    <!-- Modal para Edição (Admin) -->
     <div id="edit-modal" class="modal-overlay">
         <div class="modal-content">
             <h2>Editar Produto</h2>
@@ -118,7 +107,6 @@
         </div>
     </div>
 
-    <!-- Modal para Autenticação (Login/Cadastro) -->
     <div id="auth-modal" class="modal-overlay">
         <div class="modal-content">
             <div class="auth-tabs">
@@ -126,7 +114,6 @@
                 <button class="tab-link" data-tab="signup-tab">Criar Conta</button>
             </div>
 
-            <!-- Formulário de Login -->
             <div id="login-tab" class="tab-content active">
                 <h2>Acesse sua conta</h2>
                 <form id="login-form">
@@ -140,7 +127,6 @@
                 </form>
             </div>
 
-            <!-- Formulário de Cadastro -->
             <div id="signup-tab" class="tab-content">
                 <h2>Crie sua conta</h2>
                 <form id="signup-form">
@@ -175,191 +161,7 @@
         </div>
     </footer>
 
-    <!-- JavaScript -->
-    <script src="config.js"></script> <script src="app.js"></script>
+    <script src="config.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
-
-=======
-<!DOCTYPE html>
-<html lang="pt-BR">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Arenza Moda Íntima - Desejo e Elegância</title>
-
-    <!-- Google Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
-
-    <!-- Supabase Client Library -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-
-    <!-- Stylesheet -->
-    <link rel="stylesheet" href="style.css">
-</head>
-<body>
-
-    <header id="header" class="main-header">
-        <div class="container header-content">
-            <a href="#" class="logo">
-                <img src="img/logo.jpeg" alt="Arenza Logo">
-            </a>
-            <nav class="main-nav">
-                <a href="#hero">Início</a>
-                <a href="#products">Coleção</a>
-                <a href="#admin-panel" id="nav-admin-link" class="hidden">Painel Admin</a>
-                <a href="#" id="nav-login-link">Entrar</a>
-                <a href="#" id="nav-logout-link" class="hidden">Sair</a>
-                <a href="#footer">Contato</a>
-            </nav>
-        </div>
-    </header>
-
-    <main>
-        <!-- Seção Hero -->
-        <section id="hero" class="fade-in">
-            <div class="hero-content">
-                <h1>Arenza Moda Íntima</h1>
-                <p>Desejo e elegância em cada detalhe.</p>
-                <a href="#products" class="cta-button">Explorar Coleção</a>
-            </div>
-        </section>
-
-        <!-- Seção de Produtos -->
-        <section id="products">
-            <div class="container">
-                <h2 class="section-title fade-in">Coleção Exclusiva</h2>
-                <p class="section-subtitle fade-in">Peças desenhadas para revelar a sua melhor versão.</p>
-                <div id="product-grid" class="product-grid">
-                    <!-- Produtos serão injetados aqui -->
-                </div>
-            </div>
-        </section>
-
-        <!-- Painel de Gerenciamento de Produtos (Admin) -->
-        <section id="admin-panel" class="hidden">
-            <div class="container">
-                <h2 class="section-title fade-in">Gerenciar Produtos</h2>
-                <p class="section-subtitle fade-in">Adicione, edite ou remova peças da sua coleção com facilidade.</p>
-                <div class="admin-form-container fade-in">
-                    <form id="product-form">
-                        <div class="form-group">
-                            <input type="text" id="product-name" placeholder="Nome do Produto" required>
-                        </div>
-                        <div class="form-group">
-                            <input type="number" id="product-price" placeholder="Preço (Ex: 99.90)" step="0.01" required>
-                        </div>
-                        <div class="form-group">
-                            <textarea id="product-description" placeholder="Descrição da peça" rows="4" required></textarea>
-                        </div>
-                        <div class="form-group">
-                            <input type="url" id="product-image" placeholder="URL da Imagem" required>
-                        </div>
-                        <button type="submit" class="cta-button">Salvar Produto</button>
-                    </form>
-                </div>
-            </div>
-        </section>
-        
-        <!-- Seção de Depoimentos -->
-        <section id="testimonials">
-            <div class="container">
-                 <div id="testimonial-carousel" class="testimonial-carousel">
-                    <!-- Depoimentos serão injetados aqui -->
-                 </div>
-            </div>
-        </section>
-
-    </main>
-    
-    <!-- Modal para Edição (Admin) -->
-    <div id="edit-modal" class="modal-overlay">
-        <div class="modal-content">
-            <h2>Editar Produto</h2>
-            <form id="edit-product-form">
-                <input type="hidden" id="edit-product-id">
-                <div class="form-group">
-                    <input type="text" id="edit-product-name" placeholder="Nome do Produto" required>
-                </div>
-                <div class="form-group">
-                    <input type="number" id="edit-product-price" placeholder="Preço" step="0.01" required>
-                </div>
-                <div class="form-group">
-                    <textarea id="edit-product-description" placeholder="Descrição" rows="4" required></textarea>
-                </div>
-                <div class="form-group">
-                    <input type="url" id="edit-product-image" placeholder="URL da Imagem" required>
-                </div>
-                <div class="modal-actions">
-                     <button type="button" id="btn-cancel-edit" class="cta-button btn-cancel">Cancelar</button>
-                     <button type="submit" class="cta-button">Salvar Alterações</button>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    <!-- Modal para Autenticação (Login/Cadastro) -->
-    <div id="auth-modal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="auth-tabs">
-                <button class="tab-link active" data-tab="login-tab">Entrar</button>
-                <button class="tab-link" data-tab="signup-tab">Criar Conta</button>
-            </div>
-
-            <!-- Formulário de Login -->
-            <div id="login-tab" class="tab-content active">
-                <h2>Acesse sua conta</h2>
-                <form id="login-form">
-                    <div class="form-group">
-                        <input type="email" id="login-email" placeholder="Seu e-mail" required>
-                    </div>
-                    <div class="form-group">
-                        <input type="password" id="login-password" placeholder="Sua senha" required>
-                    </div>
-                    <button type="submit" class="cta-button">Entrar</button>
-                </form>
-            </div>
-
-            <!-- Formulário de Cadastro -->
-            <div id="signup-tab" class="tab-content">
-                <h2>Crie sua conta</h2>
-                <form id="signup-form">
-                    <div class="form-group">
-                        <input type="email" id="signup-email" placeholder="Seu e-mail" required>
-                    </div>
-                    <div class="form-group">
-                        <input type="password" id="signup-password" placeholder="Crie uma senha" required>
-                    </div>
-                    <button type="submit" class="cta-button">Criar Conta</button>
-                </form>
-            </div>
-            <p id="auth-error" class="auth-error-message hidden"></p>
-        </div>
-    </div>
-
-
-    <footer id="footer" class="main-footer">
-        <div class="container">
-            <div class="social-links">
-                <a href="#" aria-label="Instagram">
-                    <svg xmlns="https://www.instagram.com/arenzamodaintima/" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-                </a>
-                <a href="#" aria-label="Pinterest">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.237 2.636 7.855 6.356 9.312-.084-.336-.14-1.042.028-1.53.184-1.29.98-4.16 1.14-4.78.168-.642.105-1.02-.18-1.548-1.536-1.14-2.28-3.32-2.28-4.732 0-3.153 2.3-5.514 5.186-5.514 2.553 0 4.004 1.914 4.004 4.225 0 2.583-1.64 4.54-3.69 4.54-.99 0-1.74-.774-1.5-1.71.282-1.083.843-2.254.996-2.86.192-.776.75-1.41.09-1.41-1.01 0-1.78.984-1.78 2.296 0 .89.333 1.49.743 1.874.12.114.13.215.09.384-.06.27-.18.72-.24.96-.084.342-.3.45-.58.342-1.28-.512-2.07-2.04-2.07-3.414 0-2.614 2.04-5.064 5.68-5.064 3.257 0 5.48 2.33 5.48 5.178 0 3.29-2.06 5.908-4.99 5.908-.94 0-1.85-.484-2.15-1.042l-.6 2.296c-.306 1.156-1.14 2.65-1.73 3.454.71.223 1.45.345 2.22.345 5.523 0 10-4.477 10-10S17.523 2 12 2z"></path></svg>
-                </a>
-                <a href="#" aria-label="TikTok">
-                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 6.5a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z"></path><path d="M16.5 6.5v10c0 .8-.7 1.5-1.5 1.5h-1a1.5 1.5 0 0 1-1.5-1.5V11a3 3 0 0 0-3-3H2.5"></path></svg>
-                </a>
-            </div>
-            <p>&copy; 2025 Arenza Moda Íntima – Desejo e elegância em cada detalhe.</p>
-        </div>
-    </footer>
-
-    <!-- JavaScript -->
-    <script src="config.js"></script> <script src="app.js"></script>
-</body>
-</html>
-
->>>>>>> 98c78bd22d1f12cd8c19a05cd3c2bcf689955408
