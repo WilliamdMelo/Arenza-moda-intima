@@ -315,13 +315,15 @@ document.addEventListener('DOMContentLoaded', () => {
     // Formulários de Produto
     productForm.addEventListener('submit', (e) => {
         e.preventDefault();
-        const formData = new FormData(productForm);
+        // ***** INÍCIO DA CORREÇÃO *****
+        // Coleta dos dados lendo o valor de cada campo pelo ID
         const productData = {
-            name: formData.get('name'),
-            price: formData.get('price'),
-            description: formData.get('description'),
-            image: formData.get('image')
+            name: document.getElementById('product-name').value,
+            price: document.getElementById('product-price').value,
+            description: document.getElementById('product-description').value,
+            image: document.getElementById('product-image').value
         };
+        // ***** FIM DA CORREÇÃO *****
         addProduct(productData);
     });
 
@@ -386,4 +388,3 @@ document.addEventListener('DOMContentLoaded', () => {
 
     init();
 });
-
