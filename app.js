@@ -19,27 +19,35 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     // --------------------------------------------------
-    // ---- 2. CONFIGURAÇÃO E INICIALIZAÇÃO DO SUPABASE
-    // --------------------------------------------------
-    let ADMIN_EMAIL; // Será definida após carregar o config
+// ---- 2. CONFIGURAÇÃO E INICIALIZAÇÃO DO SUPABASE
+// --------------------------------------------------
+let ADMIN_EMAIL; 
 
+// Função assíncrona para buscar as chaves da Netlify Function e iniciar o Supabase
+async function initializeSupabase() {
     try {
-        // Verifica se o objeto SUPABASE_CONFIG do arquivo config.js foi carregado
-        if (typeof SUPABASE_CONFIG === 'undefined' || !SUPABASE_CONFIG.URL || !SUPABASE_CONFIG.ANON_KEY) {
-            throw new Error('As variáveis de configuração do Supabase não foram encontradas. Verifique se o arquivo config.js está correto e sendo carregado antes do app.js no seu HTML.');
+        // Chama a nossa função segura no Netlify
+        const response = await fetch('/.netlify/functions/get-config');
+        if (!response.ok) {
+            throw new Error('Falha ao buscar a configuração do servidor.');
+        }
+        const config = await response.json();
+
+        if (!config.url || !config.anonKey) {
+            throw new Error('As chaves do Supabase retornadas pelo servidor estão vazias.');
         }
 
-        const SUPABASE_URL = SUPABASE_CONFIG.URL;
-        const SUPABASE_ANON_KEY = SUPABASE_CONFIG.ANON_KEY;
-        ADMIN_EMAIL = SUPABASE_CONFIG.ADMIN_EMAIL;
+        ADMIN_EMAIL = config.adminEmail;
+        dbClient = supabase.createClient(config.url, config.anonKey);
 
-        dbClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // Se a inicialização for bem-sucedida, inicie o resto da aplicação
+        initializeApp();
 
     } catch (error) {
         console.error('Erro Crítico - Falha ao inicializar o Supabase:', error.message);
         alert(`ERRO: Não foi possível conectar ao banco de dados. Verifique o console para mais detalhes.`);
-        return; // Interrompe a execução se a conexão falhar
     }
+}
 
 
     // --------------------------------------------------
@@ -314,14 +322,15 @@ document.addEventListener('DOMContentLoaded', () => {
     window.addEventListener('scroll', () => header.classList.toggle('scrolled', window.scrollY > 50));
 
     // --------------------------------------------------
-    // ---- 9. INICIALIZAÇÃO DA APLICAÇÃO
-    // --------------------------------------------------
-    function init() {
-        renderTestimonials();
-        setInterval(nextTestimonial, 5000);
-        listenToAuthStateChanges();
-        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
-    }
+// ---- 9. INICIALIZAÇÃO DA APLICAÇÃO
+// --------------------------------------------------
+function initializeApp() {
+    // Esta função contém tudo o que precisa acontecer APÓS a conexão com o banco de dados
+    renderTestimonials();
+    setInterval(nextTestimonial, 5000);
+    listenToAuthStateChanges();
+    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+}
 
     init();
 });
