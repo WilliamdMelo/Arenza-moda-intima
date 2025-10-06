@@ -1,7 +1,7 @@
 /**
  * @file app.js
  * @description Script principal para o e-commerce Arenza, com sistema de autenticação Supabase.
- * @version 2.0 (Atualizado para garantir carregamento seguro das configurações)
+ * @version 2.0 (Atualizado para garantir carregamento seguro das configurações, fazendo teste de up in github)
  */
 
 document.addEventListener('DOMContentLoaded', () => {
