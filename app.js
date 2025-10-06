@@ -1,13 +1,13 @@
 /**
  * @file app.js
  * @description Script principal para o e-commerce Arenza, com sistema de autenticação Supabase.
- * @version 2.0 (Atualizado para garantir carregamento seguro das configurações, fazendo teste de up in github)
+ * @version 3.0 (Fluxo de inicialização corrigido para ambiente local e de produção)
  */
 
 document.addEventListener('DOMContentLoaded', () => {
 
     // --------------------------------------------------
-    // ---- 1. INICIALIZAÇÃO E VARIÁVEIS GLOBAIS
+    // ---- 1. SELETORES DO DOM E ESTADO INICIAL
     // --------------------------------------------------
     let dbClient;
     let currentUser = null;
@@ -17,42 +17,9 @@ document.addEventListener('DOMContentLoaded', () => {
         { quote: "Recebi minha encomenda super rápido e amei a embalagem. Me senti especial. Recomendo!", author: "Fernanda L." },
         { quote: "Nunca me senti tão confiante. A Arenza entende o corpo feminino como ninguém. Virou minha marca preferida.", author: "Carla M." }
     ];
+    let ADMIN_EMAIL;
 
-    // --------------------------------------------------
-// ---- 2. CONFIGURAÇÃO E INICIALIZAÇÃO DO SUPABASE
-// --------------------------------------------------
-let ADMIN_EMAIL; 
-
-// Função assíncrona para buscar as chaves da Netlify Function e iniciar o Supabase
-async function initializeSupabase() {
-    try {
-        // Chama a nossa função segura no Netlify
-        const response = await fetch('/.netlify/functions/get-config');
-        if (!response.ok) {
-            throw new Error('Falha ao buscar a configuração do servidor.');
-        }
-        const config = await response.json();
-
-        if (!config.url || !config.anonKey) {
-            throw new Error('As chaves do Supabase retornadas pelo servidor estão vazias.');
-        }
-
-        ADMIN_EMAIL = config.adminEmail;
-        dbClient = supabase.createClient(config.url, config.anonKey);
-
-        // Se a inicialização for bem-sucedida, inicie o resto da aplicação
-        initializeApp();
-
-    } catch (error) {
-        console.error('Erro Crítico - Falha ao inicializar o Supabase:', error.message);
-        alert(`ERRO: Não foi possível conectar ao banco de dados. Verifique o console para mais detalhes.`);
-    }
-}
-
-
-    // --------------------------------------------------
-    // ---- 3. SELETORES DO DOM
-    // --------------------------------------------------
+    // Seletores do DOM
     const navAdminLink = document.getElementById('nav-admin-link');
     const navLoginLink = document.getElementById('nav-login-link');
     const navLogoutLink = document.getElementById('nav-logout-link');
@@ -71,47 +38,15 @@ async function initializeSupabase() {
     const tabContents = document.querySelectorAll('.tab-content');
     const cancelEditBtn = document.getElementById('btn-cancel-edit');
 
-
     // --------------------------------------------------
-    // ---- 4. LÓGICA DE AUTENTICAÇÃO
+    // ---- 2. FUNÇÕES DE RENDERIZAÇÃO E UI
     // --------------------------------------------------
-    async function listenToAuthStateChanges() {
-        dbClient.auth.onAuthStateChange((event, session) => {
-            currentUser = session?.user || null;
-            updateUserInterface();
-            fetchProducts(); // Recarrega produtos para mostrar/ocultar botões de admin
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) entry.target.classList.add('visible');
         });
-    }
+    }, { threshold: 0.1 });
 
-    async function signUpNewUser(email, password) {
-        const { error } = await dbClient.auth.signUp({ email, password });
-        if (error) {
-            showAuthError(error.message);
-            return;
-        }
-        alert('Conta criada! Verifique seu e-mail para confirmar o cadastro.');
-        closeAuthModal();
-    }
-
-    async function signInUser(email, password) {
-        const { error } = await dbClient.auth.signInWithPassword({ email, password });
-        if (error) {
-            showAuthError('E-mail ou senha inválidos.');
-            return;
-        }
-        closeAuthModal();
-    }
-
-    async function signOutUser() {
-        const { error } = await dbClient.auth.signOut();
-        if (error) {
-            alert('Erro ao fazer logout: ' + error.message);
-        }
-    }
-
-    // --------------------------------------------------
-    // ---- 5. ATUALIZAÇÃO DA INTERFACE (UI)
-    // --------------------------------------------------
     function updateUserInterface() {
         const isAdmin = currentUser && currentUser.email === ADMIN_EMAIL;
         navLoginLink.classList.toggle('hidden', !!currentUser);
@@ -131,7 +66,6 @@ async function initializeSupabase() {
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/><path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/></svg>
                 </button>
             </div>`;
-
         return `
             <div class="product-card fade-in">
                 ${isAdmin ? adminActions : ''}
@@ -147,15 +81,33 @@ async function initializeSupabase() {
     const renderProducts = () => {
         if (!productGrid) return;
         if (!productsCache || productsCache.length === 0) {
-            productGrid.innerHTML = "<p>Nenhum produto encontrado.</p>";
+            productGrid.innerHTML = "<p>Nenhum produto encontrado na coleção.</p>";
             return;
         }
         productGrid.innerHTML = productsCache.map(createProductCard).join('');
-        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+        productGrid.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+    };
+    
+    let currentTestimonial = 0;
+    const renderTestimonials = () => {
+        if (!testimonialCarousel) return;
+        testimonialCarousel.innerHTML = testimonials.map((t, index) => `
+            <div class="testimonial-slide ${index === 0 ? 'active' : ''}">
+                <blockquote>${t.quote}</blockquote>
+                <footer>— ${t.author}</footer>
+            </div>
+        `).join('');
+    };
+    const nextTestimonial = () => {
+        const slides = testimonialCarousel.querySelectorAll('.testimonial-slide');
+        if (slides.length === 0) return;
+        slides[currentTestimonial].classList.remove('active');
+        currentTestimonial = (currentTestimonial + 1) % slides.length;
+        slides[currentTestimonial].classList.add('active');
     };
 
     // --------------------------------------------------
-    // ---- 6. FUNÇÕES DE DADOS (CRUD com Supabase)
+    // ---- 3. FUNÇÕES DE DADOS (CRUD e Auth)
     // --------------------------------------------------
     async function fetchProducts() {
         try {
@@ -167,7 +119,7 @@ async function initializeSupabase() {
             console.error('Erro ao buscar produtos:', error.message);
         }
     }
-
+    
     async function addProduct(productData) {
         try {
             const { error } = await dbClient.from('products').insert([productData]);
@@ -206,8 +158,34 @@ async function initializeSupabase() {
         }
     }
 
+    async function signUpNewUser(email, password) {
+        const { error } = await dbClient.auth.signUp({ email, password });
+        if (error) {
+            showAuthError(error.message);
+            return;
+        }
+        alert('Conta criada! Verifique seu e-mail para confirmar o cadastro.');
+        closeAuthModal();
+    }
+
+    async function signInUser(email, password) {
+        const { error } = await dbClient.auth.signInWithPassword({ email, password });
+        if (error) {
+            showAuthError('E-mail ou senha inválidos.');
+            return;
+        }
+        closeAuthModal();
+    }
+
+    async function signOutUser() {
+        const { error } = await dbClient.auth.signOut();
+        if (error) {
+            alert('Erro ao fazer logout: ' + error.message);
+        }
+    }
+
     // --------------------------------------------------
-    // ---- 7. MODAIS E OUTROS COMPONENTES
+    // ---- 4. MODAIS E EVENTOS
     // --------------------------------------------------
     const openEditModal = (product) => {
         editModal.querySelector('#edit-product-id').value = product.id;
@@ -218,7 +196,6 @@ async function initializeSupabase() {
         editModal.classList.add('active');
     };
     const closeEditModal = () => editModal.classList.remove('active');
-
     const openAuthModal = () => authModal.classList.add('active');
     const closeAuthModal = () => authModal.classList.remove('active');
     const showAuthError = (message) => {
@@ -230,106 +207,95 @@ async function initializeSupabase() {
         authErrorMessage.classList.add('hidden');
     };
 
-    const observer = new IntersectionObserver((entries) => {
-        entries.forEach(entry => {
-            if (entry.isIntersecting) entry.target.classList.add('visible');
-        });
-    }, { threshold: 0.1 });
-
-    let currentTestimonial = 0;
-    const renderTestimonials = () => {
-        if (!testimonialCarousel) return;
-        testimonialCarousel.innerHTML = testimonials.map((t, index) => `
-            <div class="testimonial-slide ${index === 0 ? 'active' : ''}">
-                <blockquote>${t.quote}</blockquote>
-                <footer>— ${t.author}</footer>
-            </div>
-        `).join('');
-    };
-    const nextTestimonial = () => {
-        const slides = testimonialCarousel.querySelectorAll('.testimonial-slide');
-        if (slides.length === 0) return;
-        slides[currentTestimonial].classList.remove('active');
-        currentTestimonial = (currentTestimonial + 1) % slides.length;
-        slides[currentTestimonial].classList.add('active');
-    };
-
-    // --------------------------------------------------
-    // ---- 8. "OUVINTES" DE EVENTOS (EVENT LISTENERS)
-    // --------------------------------------------------
-    navLoginLink.addEventListener('click', (e) => { e.preventDefault(); openAuthModal(); });
-    navLogoutLink.addEventListener('click', (e) => { e.preventDefault(); signOutUser(); });
-
-    loginForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        hideAuthError();
-        signInUser(loginForm.querySelector('#login-email').value, loginForm.querySelector('#login-password').value);
-    });
-
-    signupForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        hideAuthError();
-        signUpNewUser(signupForm.querySelector('#signup-email').value, signupForm.querySelector('#signup-password').value);
-    });
-
-    productForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        addProduct({
-            name: document.getElementById('product-name').value,
-            price: document.getElementById('product-price').value,
-            description: document.getElementById('product-description').value,
-            image: document.getElementById('product-image').value
-        });
-    });
-
-    editForm.addEventListener('submit', (e) => {
-        e.preventDefault();
-        const id = editForm.querySelector('#edit-product-id').value;
-        updateProduct(id, {
-            name: editForm.querySelector('#edit-product-name').value,
-            price: editForm.querySelector('#edit-product-price').value,
-            description: editForm.querySelector('#edit-product-description').value,
-            image: editForm.querySelector('#edit-product-image').value,
-        });
-    });
-
-    productGrid.addEventListener('click', (event) => {
-        const btn = event.target.closest('.action-btn');
-        if (!btn) return;
-        const id = parseInt(btn.dataset.id);
-        if (btn.classList.contains('delete-btn')) {
-            if (confirm('Tem certeza que deseja excluir este produto?')) deleteProduct(id);
-        } else if (btn.classList.contains('edit-btn')) {
-            const productToEdit = productsCache.find(p => p.id === id);
-            if (productToEdit) openEditModal(productToEdit);
-        }
-    });
-
-    tabLinks.forEach(tab => {
-        tab.addEventListener('click', () => {
+    function setupEventListeners() {
+        navLoginLink.addEventListener('click', (e) => { e.preventDefault(); openAuthModal(); });
+        navLogoutLink.addEventListener('click', (e) => { e.preventDefault(); signOutUser(); });
+        loginForm.addEventListener('submit', (e) => {
+            e.preventDefault();
             hideAuthError();
-            tabLinks.forEach(item => item.classList.remove('active'));
-            tabContents.forEach(item => item.classList.remove('active'));
-            tab.classList.add('active');
-            document.getElementById(tab.dataset.tab).classList.add('active');
+            signInUser(loginForm.querySelector('#login-email').value, loginForm.querySelector('#login-password').value);
         });
-    });
-
-    authModal.addEventListener('click', (e) => { if (e.target === authModal) closeAuthModal(); });
-    editModal.addEventListener('click', (e) => { if (e.target === editModal) closeEditModal(); });
-    cancelEditBtn.addEventListener('click', closeEditModal);
-
-    window.addEventListener('scroll', () => header.classList.toggle('scrolled', window.scrollY > 50));
+        signupForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            hideAuthError();
+            signUpNewUser(signupForm.querySelector('#signup-email').value, signupForm.querySelector('#signup-password').value);
+        });
+        productForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            addProduct({ name: document.getElementById('product-name').value, price: document.getElementById('product-price').value, description: document.getElementById('product-description').value, image: document.getElementById('product-image').value });
+        });
+        editForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            const id = editForm.querySelector('#edit-product-id').value;
+            updateProduct(id, { name: editForm.querySelector('#edit-product-name').value, price: editForm.querySelector('#edit-product-price').value, description: editForm.querySelector('#edit-product-description').value, image: editForm.querySelector('#edit-product-image').value });
+        });
+        productGrid.addEventListener('click', (event) => {
+            const btn = event.target.closest('.action-btn');
+            if (!btn) return;
+            const id = parseInt(btn.dataset.id);
+            if (btn.classList.contains('delete-btn')) {
+                if (confirm('Tem certeza que deseja excluir este produto?')) deleteProduct(id);
+            } else if (btn.classList.contains('edit-btn')) {
+                const productToEdit = productsCache.find(p => p.id === id);
+                if (productToEdit) openEditModal(productToEdit);
+            }
+        });
+        tabLinks.forEach(tab => {
+            tab.addEventListener('click', () => {
+                hideAuthError();
+                tabLinks.forEach(item => item.classList.remove('active'));
+                tabContents.forEach(item => item.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tab.dataset.tab).classList.add('active');
+            });
+        });
+        authModal.addEventListener('click', (e) => { if (e.target === authModal) closeAuthModal(); });
+        editModal.addEventListener('click', (e) => { if (e.target === editModal) closeEditModal(); });
+        cancelEditBtn.addEventListener('click', closeEditModal);
+        window.addEventListener('scroll', () => header.classList.toggle('scrolled', window.scrollY > 50));
+    }
 
     // --------------------------------------------------
-// ---- 9. INICIALIZAÇÃO DA APLICAÇÃO
-// --------------------------------------------------
-function initializeApp() {
-    // Esta função contém tudo o que precisa acontecer APÓS a conexão com o banco de dados
-    renderTestimonials();
-    setInterval(nextTestimonial, 5000);
-    listenToAuthStateChanges();
-    document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
-}
+    // ---- 5. INICIALIZAÇÃO DA APLICAÇÃO
+    // --------------------------------------------------
+    async function main() {
+        // Ambiente de desenvolvimento (local) - Verifica se config.js foi carregado
+        if (typeof SUPABASE_CONFIG !== 'undefined') {
+            ADMIN_EMAIL = SUPABASE_CONFIG.ADMIN_EMAIL;
+            dbClient = supabase.createClient(SUPABASE_CONFIG.URL, SUPABASE_CONFIG.ANON_KEY);
+        } 
+        // Ambiente de produção (Netlify) - Busca as chaves da Netlify Function
+        else {
+            try {
+                const response = await fetch('/.netlify/functions/get-config');
+                if (!response.ok) throw new Error('Falha ao buscar config do servidor.');
+                const config = await response.json();
+                if (!config.url || !config.anonKey) throw new Error('Chaves do Supabase retornadas pelo servidor estão vazias.');
+                
+                ADMIN_EMAIL = config.adminEmail;
+                dbClient = supabase.createClient(config.url, config.anonKey);
+            } catch (error) {
+                console.error('Erro Crítico - Falha ao inicializar o Supabase:', error.message);
+                alert(`ERRO: Não foi possível conectar ao banco de dados. Verifique o console.`);
+                return; // Encerra a execução se não conseguir conectar
+            }
+        }
 
+        // --- Código que roda APÓS a conexão ser estabelecida com sucesso ---
+        setupEventListeners();
+        renderTestimonials();
+        setInterval(nextTestimonial, 5000);
+        
+        // Ativa o listener de autenticação que, por sua vez, irá buscar os produtos
+        dbClient.auth.onAuthStateChange((event, session) => {
+            currentUser = session?.user || null;
+            updateUserInterface();
+            fetchProducts(); // Busca os produtos assim que o estado do usuário é conhecido
+        });
+        
+        // Ativa as animações de fade-in para os elementos que já existem na página
+        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+    }
+
+    main(); // Ponto de partida da aplicação
 });
