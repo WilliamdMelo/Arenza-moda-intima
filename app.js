@@ -332,5 +332,4 @@ function initializeApp() {
     document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 }
 
-    init();
 });
