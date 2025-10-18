@@ -13,11 +13,12 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentUser = null;
     let productsCache = [];
     const testimonials = [
-        { quote: "As peças são ainda mais bonitas pessoalmente. Qualidade impecável e caimento perfeito!", author: "Juliana S." },
-        { quote: "Recebi minha encomenda super rápido e amei a embalagem. Me senti especial. Recomendo!", author: "Fernanda L." },
+        { quote: "As peças são ainda mais bonitas pessoalmente. Qualidade impecável e caimento perfeito!", author: "Juliana S."},
+        { quote: "Recebi minha encomenda super rápido e amei a embalagem. Me senti especial. Recomendo!", author: "Fernanda L."},
         { quote: "Nunca me senti tão confiante. A Arenza entende o corpo feminino como ninguém. Virou minha marca preferida.", author: "Carla M." }
     ];
     let ADMIN_EMAIL;
+    const VARIANT_FIELD_KEY = 'size_variants';
 
     // Seletores do DOM
     const navAdminLink = document.getElementById('nav-admin-link');
@@ -31,6 +32,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const authModal = document.getElementById('auth-modal');
     const productForm = document.getElementById('product-form');
     const editForm = document.getElementById('edit-product-form');
+    const productVariantsInput = document.getElementById('product-variants');
+    const editVariantsInput = document.getElementById('edit-product-variants');
     const loginForm = document.getElementById('login-form');
     const signupForm = document.getElementById('signup-form');
     const authErrorMessage = document.getElementById('auth-error');
@@ -46,6 +49,129 @@ document.addEventListener('DOMContentLoaded', () => {
             if (entry.isIntersecting) entry.target.classList.add('visible');
         });
     }, { threshold: 0.1 });
+
+    const escapeHtml = (value) => {
+        return String(value)
+            .replace(/&/g, '&amp;')
+            .replace(/</g, '&lt;')
+            .replace(/>/g, '&gt;')
+            .replace(/"/g, '&quot;')
+            .replace(/'/g, '&#39;');
+    };
+
+    const normalizeVariantEntry = (entry) => {
+        if (!entry) return null;
+        const size = (entry.size || entry.tamanho || '').toString().trim();
+        if (!size) return null;
+        let prints = entry.prints || entry.estampas || entry.options || entry.value;
+        if (typeof prints === 'string') {
+            prints = prints.split(',');
+        }
+        if (!Array.isArray(prints)) {
+            prints = Object.values(prints || {});
+        }
+        const sanitizedPrints = prints
+            .map(print => (print ?? '').toString().trim())
+            .filter(Boolean);
+        if (sanitizedPrints.length === 0) return null;
+        return { size, prints: sanitizedPrints };
+    };
+
+    const parseVariantField = (raw) => {
+        if (!raw) return [];
+        if (Array.isArray(raw)) {
+            return raw.map(normalizeVariantEntry).filter(Boolean);
+        }
+        if (typeof raw === 'string') {
+            try {
+                const parsed = JSON.parse(raw);
+                return parseVariantField(parsed);
+            } catch (error) {
+                console.warn('Não foi possível interpretar as variantes (JSON inválido).');
+                return [];
+            }
+        }
+        if (typeof raw === 'object') {
+            if ('size' in raw || 'tamanho' in raw) {
+                const single = normalizeVariantEntry(raw);
+                return single ? [single] : [];
+            }
+            return Object.entries(raw)
+                .map(([size, prints]) => normalizeVariantEntry({ size, prints }))
+                .filter(Boolean);
+        }
+        return [];
+    };
+
+    const parseVariantTextareaInput = (value) => {
+        if (!value || !value.trim()) return [];
+        const lines = value.split('\n').map(line => line.trim()).filter(Boolean);
+        const variants = [];
+        lines.forEach((line) => {
+            const [sizePart, printsPart] = line.split(':');
+            if (!printsPart) {
+                throw new Error(`Formato inválido na linha: "${line}". Use "Tamanho: Estampa 1, Estampa 2".`);
+            }
+            const size = sizePart.trim();
+            if (!size) {
+                throw new Error(`Informe o tamanho antes dos dois pontos na linha: "${line}".`);
+            }
+            const prints = printsPart.split(',').map(item => item.trim()).filter(Boolean);
+            if (prints.length === 0) {
+                throw new Error(`Adicione ao menos uma estampa para o tamanho "${size}".`);
+            }
+            variants.push({ size, prints });
+        });
+        return variants;
+    };
+
+    const formatVariantsForTextarea = (variants) => {
+        if (!variants || variants.length === 0) return '';
+        return variants.map(variant => `${variant.size}: ${variant.prints.join(', ')}`).join('\n');
+    };
+
+    const getProductVariants = (product) => {
+        if (!product) return [];
+        const raw = product[VARIANT_FIELD_KEY] || product.variants || product.variant_options;
+        return parseVariantField(raw);
+    };
+
+    const initializeVariantControls = () => {
+        if (!productGrid) return;
+        productGrid.querySelectorAll('.size-select').forEach((select) => {
+            const productId = parseInt(select.dataset.productId, 10);
+            if (Number.isNaN(productId)) return;
+            const product = productsCache.find(item => item.id === productId);
+            const variants = product?.variantOptions || [];
+            const printsContainer = productGrid.querySelector(`.print-options[data-product-id="${productId}"]`);
+            if (!printsContainer) return;
+
+            const renderPrints = (size) => {
+                const variant = variants.find(item => item.size === size);
+                if (!variant) {
+                    printsContainer.innerHTML = '<p class="print-empty">Estampas indisponíveis para este tamanho.</p>';
+                    return;
+                }
+                const badges = variant.prints
+                    .map(print => `<span class="print-badge">${escapeHtml(print)}</span>`)
+                    .join('');
+                printsContainer.innerHTML = `
+                    <p>Estampas disponíveis:</p>
+                    <div class="print-list">${badges}</div>
+                `;
+            };
+
+            select.addEventListener('change', (event) => {
+                renderPrints(event.target.value);
+            });
+
+            if (variants.length > 0) {
+                renderPrints(select.value);
+            } else {
+                printsContainer.innerHTML = '';
+            }
+        });
+    };
 
     function updateUserInterface() {
         const isAdmin = currentUser && currentUser.email === ADMIN_EMAIL;
@@ -66,6 +192,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5m3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0z"/><path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1zM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4zM2.5 3h11V2h-11z"/></svg>
                 </button>
             </div>`;
+        const variants = product.variantOptions || [];
+        const hasVariants = variants.length > 0;
+        const selectId = `size-select-${product.id}`;
+        const optionsMarkup = variants.map((variant, index) => {
+            const sizeLabel = escapeHtml(variant.size);
+            return `<option value="${sizeLabel}" ${index === 0 ? 'selected' : ''}>${sizeLabel}</option>`;
+        }).join('');
+        const variantMarkup = hasVariants ? `
+                <div class="card-variants">
+                    <div class="variant-selector">
+                        <label for="${selectId}">Selecione o tamanho</label>
+                        <select id="${selectId}" class="size-select" data-product-id="${product.id}">
+                            ${optionsMarkup}
+                        </select>
+                    </div>
+                    <div class="print-options" data-product-id="${product.id}"></div>
+                </div>` : '';
+
         return `
             <div class="product-card fade-in">
                 ${isAdmin ? adminActions : ''}
@@ -74,6 +218,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     <h3>${product.name}</h3>
                     <p class="price">R$ ${parseFloat(product.price).toFixed(2).replace('.', ',')}</p>
                     <p>${product.description}</p>
+                    ${variantMarkup}
                 </div>
             </div>`;
     };
@@ -86,8 +231,9 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         productGrid.innerHTML = productsCache.map(createProductCard).join('');
         productGrid.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+        initializeVariantControls();
     };
-    
+
     let currentTestimonial = 0;
     const renderTestimonials = () => {
         if (!testimonialCarousel) return;
@@ -113,13 +259,16 @@ document.addEventListener('DOMContentLoaded', () => {
         try {
             const { data, error } = await dbClient.from('products').select('*').order('id', { ascending: true });
             if (error) throw error;
-            productsCache = data;
+            productsCache = data.map(product => ({
+                ...product,
+                variantOptions: getProductVariants(product)
+            }));
             renderProducts();
         } catch (error) {
             console.error('Erro ao buscar produtos:', error.message);
         }
     }
-    
+
     async function addProduct(productData) {
         try {
             const { error } = await dbClient.from('products').insert([productData]);
@@ -193,6 +342,9 @@ document.addEventListener('DOMContentLoaded', () => {
         editModal.querySelector('#edit-product-price').value = product.price;
         editModal.querySelector('#edit-product-description').value = product.description;
         editModal.querySelector('#edit-product-image').value = product.image;
+        if (editVariantsInput) {
+            editVariantsInput.value = formatVariantsForTextarea(product.variantOptions || []);
+        }
         editModal.classList.add('active');
     };
     const closeEditModal = () => editModal.classList.remove('active');
@@ -222,12 +374,40 @@ document.addEventListener('DOMContentLoaded', () => {
         });
         productForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            addProduct({ name: document.getElementById('product-name').value, price: document.getElementById('product-price').value, description: document.getElementById('product-description').value, image: document.getElementById('product-image').value });
+            let variantPayload = null;
+            try {
+                const variants = parseVariantTextareaInput(productVariantsInput?.value || '');
+                variantPayload = variants.length > 0 ? JSON.stringify(variants) : null;
+            } catch (error) {
+                alert(error.message);
+                return;
+            }
+            addProduct({
+                name: document.getElementById('product-name').value,
+                price: document.getElementById('product-price').value,
+                description: document.getElementById('product-description').value,
+                image: document.getElementById('product-image').value,
+                [VARIANT_FIELD_KEY]: variantPayload
+            });
         });
         editForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const id = editForm.querySelector('#edit-product-id').value;
-            updateProduct(id, { name: editForm.querySelector('#edit-product-name').value, price: editForm.querySelector('#edit-product-price').value, description: editForm.querySelector('#edit-product-description').value, image: editForm.querySelector('#edit-product-image').value });
+            let variantPayload = null;
+            try {
+                const variants = parseVariantTextareaInput(editVariantsInput?.value || '');
+                variantPayload = variants.length > 0 ? JSON.stringify(variants) : null;
+            } catch (error) {
+                alert(error.message);
+                return;
+            }
+            updateProduct(id, {
+                name: editForm.querySelector('#edit-product-name').value,
+                price: editForm.querySelector('#edit-product-price').value,
+                description: editForm.querySelector('#edit-product-description').value,
+                image: editForm.querySelector('#edit-product-image').value,
+                [VARIANT_FIELD_KEY]: variantPayload
+            });
         });
         productGrid.addEventListener('click', (event) => {
             const btn = event.target.closest('.action-btn');
@@ -263,7 +443,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof SUPABASE_CONFIG !== 'undefined') {
             ADMIN_EMAIL = SUPABASE_CONFIG.ADMIN_EMAIL;
             dbClient = supabase.createClient(SUPABASE_CONFIG.URL, SUPABASE_CONFIG.ANON_KEY);
-        } 
+        }
         // Ambiente de produção (Netlify) - Busca as chaves da Netlify Function
         else {
             try {
@@ -271,7 +451,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 if (!response.ok) throw new Error('Falha ao buscar config do servidor.');
                 const config = await response.json();
                 if (!config.url || !config.anonKey) throw new Error('Chaves do Supabase retornadas pelo servidor estão vazias.');
-                
+
                 ADMIN_EMAIL = config.adminEmail;
                 dbClient = supabase.createClient(config.url, config.anonKey);
             } catch (error) {
@@ -285,14 +465,14 @@ document.addEventListener('DOMContentLoaded', () => {
         setupEventListeners();
         renderTestimonials();
         setInterval(nextTestimonial, 5000);
-        
+
         // Ativa o listener de autenticação que, por sua vez, irá buscar os produtos
         dbClient.auth.onAuthStateChange((event, session) => {
             currentUser = session?.user || null;
             updateUserInterface();
             fetchProducts(); // Busca os produtos assim que o estado do usuário é conhecido
         });
-        
+
         // Ativa as animações de fade-in para os elementos que já existem na página
         document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
     }

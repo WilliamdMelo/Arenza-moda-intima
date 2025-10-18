@@ -232,6 +232,57 @@ section {
     color: #666;
     line-height: 1.6;
 }
+.card-variants {
+    margin-top: 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+}
+.variant-selector label {
+    display: block;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+.variant-selector select {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.variant-selector select:focus {
+    outline: none;
+    border-color: var(--red-primary);
+    box-shadow: 0 0 0 3px rgba(196, 0, 24, 0.2);
+}
+.print-options {
+    background-color: #fafafa;
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+}
+.print-options p {
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+}
+.print-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+}
+.print-badge {
+    background-color: var(--red-primary);
+    color: var(--white-primary);
+    padding: 0.35rem 0.75rem;
+    border-radius: 50px;
+    font-size: 0.85rem;
+    letter-spacing: 0.5px;
+}
+.print-empty {
+    color: #999;
+    font-size: 0.9rem;
+}
 .card-actions {
     position: absolute;
     top: 1rem;
@@ -289,6 +340,12 @@ section {
     outline: none;
     border-color: var(--red-primary);
     box-shadow: 0 0 0 3px rgba(196, 0, 24, 0.2);
+}
+.form-hint {
+    display: block;
+    margin-top: 0.5rem;
+    font-size: 0.85rem;
+    color: #888;
 }
 
 /* ---- SEÇÃO DEPOIMENTOS ---- */
@@ -480,4 +537,3 @@ section {
         gap: 1rem;
     }
 }
-
