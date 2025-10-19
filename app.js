@@ -13,12 +13,16 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentUser = null;
     let productsCache = [];
     const testimonials = [
-        { quote: "As peças são ainda mais bonitas pessoalmente. Qualidade impecável e caimento perfeito!", author: "Juliana S."},
-        { quote: "Recebi minha encomenda super rápido e amei a embalagem. Me senti especial. Recomendo!", author: "Fernanda L."},
+        { quote: "As peças são ainda mais bonitas pessoalmente. Qualidade impecável e caimento perfeito!", author: "Juliana S." },
+        { quote: "Recebi minha encomenda super rápido e amei a embalagem. Me senti especial. Recomendo!", author: "Fernanda L." },
         { quote: "Nunca me senti tão confiante. A Arenza entende o corpo feminino como ninguém. Virou minha marca preferida.", author: "Carla M." }
     ];
     let ADMIN_EMAIL;
     const VARIANT_FIELD_KEY = 'size_variants';
+    const REMOTE_CONFIG_ENDPOINTS = [
+        '/api/get-config',
+        '/.netlify/functions/get-config'
+    ];
 
     // Seletores do DOM
     const navAdminLink = document.getElementById('nav-admin-link');
@@ -255,7 +259,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // --------------------------------------------------
     // ---- 3. FUNÇÕES DE DADOS (CRUD e Auth)
     // --------------------------------------------------
+    const ensureDbClient = () => {
+        if (dbClient) return true;
+        alert('Não foi possível conectar ao banco de dados. Verifique a configuração do Supabase.');
+        return false;
+    };
+
     async function fetchProducts() {
+        if (!ensureDbClient()) {
+            if (productGrid) {
+                productGrid.innerHTML = '<p class="connection-error">Não foi possível carregar os produtos. Revise as chaves do Supabase.</p>';
+            }
+            return;
+        }
         try {
             const { data, error } = await dbClient.from('products').select('*').order('id', { ascending: true });
             if (error) throw error;
@@ -270,6 +286,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function addProduct(productData) {
+        if (!ensureDbClient()) return;
         try {
             const { error } = await dbClient.from('products').insert([productData]);
             if (error) throw error;
@@ -283,6 +300,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function updateProduct(productId, productData) {
+        if (!ensureDbClient()) return;
         try {
             const { error } = await dbClient.from('products').update(productData).eq('id', productId);
             if (error) throw error;
@@ -296,6 +314,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function deleteProduct(productId) {
+        if (!ensureDbClient()) return;
         try {
             const { error } = await dbClient.from('products').delete().eq('id', productId);
             if (error) throw error;
@@ -308,6 +327,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function signUpNewUser(email, password) {
+        if (!ensureDbClient()) return;
         const { error } = await dbClient.auth.signUp({ email, password });
         if (error) {
             showAuthError(error.message);
@@ -318,6 +338,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function signInUser(email, password) {
+        if (!ensureDbClient()) return;
         const { error } = await dbClient.auth.signInWithPassword({ email, password });
         if (error) {
             showAuthError('E-mail ou senha inválidos.');
@@ -327,6 +348,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     async function signOutUser() {
+        if (!ensureDbClient()) return;
         const { error } = await dbClient.auth.signOut();
         if (error) {
             alert('Erro ao fazer logout: ' + error.message);
@@ -438,45 +460,52 @@ document.addEventListener('DOMContentLoaded', () => {
     // --------------------------------------------------
     // ---- 5. INICIALIZAÇÃO DA APLICAÇÃO
     // --------------------------------------------------
-    async function main() {
-        // Ambiente de desenvolvimento (local) - Verifica se config.js foi carregado
-        if (typeof SUPABASE_CONFIG !== 'undefined') {
-            ADMIN_EMAIL = SUPABASE_CONFIG.ADMIN_EMAIL;
-            dbClient = supabase.createClient(SUPABASE_CONFIG.URL, SUPABASE_CONFIG.ANON_KEY);
-        }
-        // Ambiente de produção (Netlify) - Busca as chaves da Netlify Function
-        else {
+    async function resolveRemoteConfig() {
+        for (const endpoint of REMOTE_CONFIG_ENDPOINTS) {
             try {
-                const response = await fetch('/.netlify/functions/get-config');
-                if (!response.ok) throw new Error('Falha ao buscar config do servidor.');
+                const response = await fetch(endpoint, { cache: 'no-store' });
+                if (!response.ok) continue;
                 const config = await response.json();
-                if (!config.url || !config.anonKey) throw new Error('Chaves do Supabase retornadas pelo servidor estão vazias.');
-
-                ADMIN_EMAIL = config.adminEmail;
-                dbClient = supabase.createClient(config.url, config.anonKey);
+                if (config?.url && config?.anonKey) {
+                    return config;
+                }
             } catch (error) {
-                console.error('Erro Crítico - Falha ao inicializar o Supabase:', error.message);
-                alert(`ERRO: Não foi possível conectar ao banco de dados. Verifique o console.`);
-                return; // Encerra a execução se não conseguir conectar
+                console.warn(`Falha ao carregar configuração em ${endpoint}:`, error);
             }
         }
+        throw new Error('Não foi possível carregar as chaves do Supabase.');
+    }
 
-        // --- Código que roda APÓS a conexão ser estabelecida com sucesso ---
+    async function main() {
         setupEventListeners();
         renderTestimonials();
         setInterval(nextTestimonial, 5000);
+        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
 
-        // Ativa o listener de autenticação que, por sua vez, irá buscar os produtos
+        try {
+            // Ambiente de desenvolvimento (local) - Verifica se config.js foi carregado
+            if (typeof SUPABASE_CONFIG !== 'undefined') {
+                ADMIN_EMAIL = SUPABASE_CONFIG.ADMIN_EMAIL;
+                dbClient = supabase.createClient(SUPABASE_CONFIG.URL, SUPABASE_CONFIG.ANON_KEY);
+            } else {
+                const config = await resolveRemoteConfig();
+                ADMIN_EMAIL = config.adminEmail;
+                dbClient = supabase.createClient(config.url, config.anonKey);
+            }
+        } catch (error) {
+            console.error('Erro Crítico - Falha ao inicializar o Supabase:', error.message);
+            if (productGrid) {
+                productGrid.innerHTML = '<p class="connection-error">Não foi possível conectar ao banco de dados. Configure o endpoint /api/get-config na Vercel ou o /.netlify/functions/get-config.</p>';
+            }
+            return;
+        }
+
         dbClient.auth.onAuthStateChange((event, session) => {
             currentUser = session?.user || null;
             updateUserInterface();
-            fetchProducts(); // Busca os produtos assim que o estado do usuário é conhecido
+            fetchProducts();
         });
-
-        // Ativa as animações de fade-in para os elementos que já existem na página
-        document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
     }
 
     main(); // Ponto de partida da aplicação
 });
-    

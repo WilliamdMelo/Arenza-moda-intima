@@ -1,10 +1,10 @@
  (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
 diff --git a/VERCEL_MIGRATION.md b/VERCEL_MIGRATION.md
 new file mode 100644
-index 0000000000000000000000000000000000000000..ebd0c4ce2e495e7917c514938c0088b31152d1ec
+index 0000000000000000000000000000000000000000..45c7c83f0afe90df4181e8d8070942f3d37ba3d3
 --- /dev/null
 +++ b/VERCEL_MIGRATION.md
-@@ -0,0 +1,76 @@
+@@ -0,0 +1,77 @@
 +# Migração do projeto Arenza Moda Íntima do Netlify para a Vercel
 +
 +Este guia reúne um passo a passo detalhado para migrar o site estático e o domínio da Arenza Moda Íntima do Netlify para a Vercel, preservando o fluxo com Supabase.
@@ -25,23 +25,24 @@ index 0000000000000000000000000000000000000000..ebd0c4ce2e495e7917c514938c0088b3
 +   * Escolha ou crie um time/projeto na Vercel.
 +
 +## 2. Ajustes de código para as Functions
-+O projeto usa uma Function Netlify (`netlify/functions/get-config.js`) para expor as variáveis do Supabase. Migre-a para a Vercel criando `api/get-config.js`:
++O projeto usa uma Function Netlify (`netlify/functions/get-config.js`) para expor as variáveis do Supabase. Migre-a para a Vercel criando `api/get-config.js` (exemplo em CommonJS já presente no repositório):
 +```javascript
-+export default async function handler(request, response) {
-+  const { SUPABASE_URL, SUPABASE_ANON_KEY, SUPABASE_ADMIN_EMAIL } = process.env;
++module.exports = (req, res) => {
++  const { SUPABASE_URL, SUPABASE_ANON_KEY, ADMIN_EMAIL } = process.env;
 +
 +  if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
-+    return response.status(500).json({ message: 'Supabase config missing.' });
++    res.status(500).json({ message: 'Supabase config missing.' });
++    return;
 +  }
 +
-+  return response.status(200).json({
++  res.status(200).json({
 +    url: SUPABASE_URL,
 +    anonKey: SUPABASE_ANON_KEY,
-+    adminEmail: SUPABASE_ADMIN_EMAIL || null
++    adminEmail: ADMIN_EMAIL || null
 +  });
-+}
++};
 +```
-+* Atualize `app.js` se necessário para buscar `/.netlify/functions/get-config` **ou** a nova rota `/api/get-config` (substitua a URL em produção).
++* Atualize `app.js` para buscar `/.netlify/functions/get-config` **ou** a nova rota `/api/get-config` (o script já trata ambas).
 +* Remova arquivos específicos do Netlify (`netlify.toml`, pasta `netlify/`) após validar a nova rota.
 +
 +## 3. Configuração do projeto na Vercel
@@ -50,7 +51,7 @@ index 0000000000000000000000000000000000000000..ebd0c4ce2e495e7917c514938c0088b3
 +3. No painel **Settings → Environment Variables**, cadastre:
 +   * `SUPABASE_URL`
 +   * `SUPABASE_ANON_KEY`
-+   * `SUPABASE_ADMIN_EMAIL`
++   * `ADMIN_EMAIL`
 +4. Se usar Preview Deployments, replique as variáveis para os ambientes *Preview* e *Development* conforme necessário.
 +
 +## 4. Deploy inicial

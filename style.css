@@ -283,6 +283,15 @@ section {
     color: #999;
     font-size: 0.9rem;
 }
+.connection-error {
+    background-color: #fff5f5;
+    border: 1px solid #f4c7c7;
+    border-radius: 8px;
+    color: var(--red-primary);
+    padding: 1.5rem;
+    text-align: center;
+    line-height: 1.5;
+}
 .card-actions {
     position: absolute;
     top: 1rem;

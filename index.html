@@ -1,143 +1,179 @@
- (cd "$(git rev-parse --show-toplevel)" && git apply --3way <<'EOF' 
-diff --git a/index.html b/index.html
-index 59a8c70206dbb494716a35bb4a72b18eb407c1f1..effe91b0b7f176f825f5f2997fb8010956c8686a 100644
---- a/index.html
-+++ b/index.html
-@@ -45,122 +45,135 @@
-                 <h2 class="section-title fade-in">Coleção Exclusiva</h2>
-                 <p class="section-subtitle fade-in">Peças desenhadas para revelar a sua melhor versão.</p>
-                 <div id="product-grid" class="product-grid">
-                     </div>
-             </div>
-         </section>
- 
-         <section id="admin-panel" class="hidden">
-             <div class="container">
-                 <h2 class="section-title fade-in">Gerenciar Produtos</h2>
-                 <p class="section-subtitle fade-in">Adicione, edite ou remova peças da sua coleção com facilidade.</p>
-                 <div class="admin-form-container fade-in">
-                     <form id="product-form">
-                         <div class="form-group">
-                             <input type="text" id="product-name" placeholder="Nome do Produto" required>
-                         </div>
-                         <div class="form-group">
-                             <input type="number" id="product-price" placeholder="Preço (Ex: 99.90)" step="0.01" required>
-                         </div>
-                         <div class="form-group">
-                             <textarea id="product-description" placeholder="Descrição da peça" rows="4" required></textarea>
-                         </div>
-                         <div class="form-group">
-                             <input type="url" id="product-image" placeholder="URL da Imagem" required>
-                         </div>
-+                        <div class="form-group">
-+                            <textarea id="product-variants" placeholder="Opções de tamanhos e estampas (Ex: P: Floral, Listrada)" rows="4"></textarea>
-+                            <small class="form-hint">Informe uma opção por linha no formato <strong>Tamanho: Estampa 1, Estampa 2</strong>.</small>
-+                        </div>
-                         <button type="submit" class="cta-button">Salvar Produto</button>
-                     </form>
-                 </div>
-             </div>
-         </section>
-         
-         <section id="testimonials">
-             <div class="container">
-                  <div id="testimonial-carousel" class="testimonial-carousel">
-                     </div>
-             </div>
-         </section>
- 
-     </main>
-     
-     <div id="edit-modal" class="modal-overlay">
-         <div class="modal-content">
-             <h2>Editar Produto</h2>
-             <form id="edit-product-form">
-                 <input type="hidden" id="edit-product-id">
-                 <div class="form-group">
-                     <input type="text" id="edit-product-name" placeholder="Nome do Produto" required>
-                 </div>
-                 <div class="form-group">
-                     <input type="number" id="edit-product-price" placeholder="Preço" step="0.01" required>
-                 </div>
-                 <div class="form-group">
-                     <textarea id="edit-product-description" placeholder="Descrição" rows="4" required></textarea>
-                 </div>
-                 <div class="form-group">
-                     <input type="url" id="edit-product-image" placeholder="URL da Imagem" required>
-                 </div>
-+                <div class="form-group">
-+                    <textarea id="edit-product-variants" placeholder="Opções de tamanhos e estampas" rows="4"></textarea>
-+                    <small class="form-hint">Use o formato <strong>Tamanho: Estampa 1, Estampa 2</strong> em cada linha.</small>
-+                </div>
-                 <div class="modal-actions">
-                      <button type="button" id="btn-cancel-edit" class="cta-button btn-cancel">Cancelar</button>
-                      <button type="submit" class="cta-button">Salvar Alterações</button>
-                 </div>
-             </form>
-         </div>
-     </div>
- 
-     <div id="auth-modal" class="modal-overlay">
-         <div class="modal-content">
-             <div class="auth-tabs">
-                 <button class="tab-link active" data-tab="login-tab">Entrar</button>
-                 <button class="tab-link" data-tab="signup-tab">Criar Conta</button>
-             </div>
- 
-             <div id="login-tab" class="tab-content active">
-                 <h2>Acesse sua conta</h2>
-                 <form id="login-form">
-                     <div class="form-group">
-                         <input type="email" id="login-email" placeholder="Seu e-mail" required>
-                     </div>
-                     <div class="form-group">
-                         <input type="password" id="login-password" placeholder="Sua senha" required>
-                     </div>
-                     <button type="submit" class="cta-button">Entrar</button>
-                 </form>
-             </div>
- 
-             <div id="signup-tab" class="tab-content">
-                 <h2>Crie sua conta</h2>
-                 <form id="signup-form">
-                     <div class="form-group">
-                         <input type="email" id="signup-email" placeholder="Seu e-mail" required>
-                     </div>
-                     <div class="form-group">
-                         <input type="password" id="signup-password" placeholder="Crie uma senha" required>
-                     </div>
-                     <button type="submit" class="cta-button">Criar Conta</button>
-                 </form>
-             </div>
-             <p id="auth-error" class="auth-error-message hidden"></p>
-         </div>
-     </div>
- 
- 
-     <footer id="footer" class="main-footer">
-         <div class="container">
-             <div class="social-links">
--                <a href="#" aria-label="Instagram">
--                    <svg xmlns="https://www.instagram.com/arenzamodaintima/" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-+                <a href="https://www.instagram.com/arenzamodaintima/" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
-+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
-+                </a>
-+                <a href="https://wa.me/5549998267351" aria-label="WhatsApp" target="_blank" rel="noopener noreferrer">
-+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
-+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.031-.967-.273-.099-.472-.148-.672.149s-.773.967-.947 1.167c-.173.199-.347.223-.644.074-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.298-.018-.459.13-.608.134-.133.298-.347.446-.52.149-.173.198-.298.298-.497.099-.198.05-.372-.025-.521-.074-.149-.672-1.611-.921-2.207-.242-.579-.487-.5-.672-.51-.173-.009-.372-.011-.571-.011-.198 0-.52.074-.793.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.099 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.571-.347zM12.004 2C6.803 2 2.5 6.303 2.5 11.504c0 2.036.532 3.911 1.547 5.582L2 22l5.074-1.988c1.617.884 3.44 1.349 5.33 1.349h.002c5.201 0 9.504-4.303 9.504-9.504C21.91 6.303 17.207 2 12.004 2z" />
-+                    </svg>
-                 </a>
-                 
-             </div>
-             <p>&copy; 2025 Arenza Moda Íntima –-  Desejo e elegância em cada detalhe.</p>
-         </div>
-     </footer>
- 
-     <script src="app.js"></script>
- </body>
--</html>
-\ No newline at end of file
-+</html>
- 
-EOF
-)
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Arenza Moda Íntima - Desejo e Elegância</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Poppins:wght@300;400;500&display=swap" rel="stylesheet">
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header id="header" class="main-header">
+        <div class="container header-content">
+            <a href="#" class="logo">
+                <img src="img/logo.jpeg" alt="Arenza Logo">
+            </a>
+            <nav class="main-nav">
+                <a href="#hero">Início</a>
+                <a href="#products">Coleção</a>
+                <a href="#admin-panel" id="nav-admin-link" class="hidden">Painel Admin</a>
+                <a href="#" id="nav-login-link">Entrar</a>
+                <a href="#" id="nav-logout-link" class="hidden">Sair</a>
+                <a href="#footer">Contato</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <section id="hero" class="fade-in">
+            <div class="hero-content">
+                <h1>Arenza Moda Íntima</h1>
+                <p>Desejo e elegância em cada detalhe.</p>
+                <a href="#products" class="cta-button">Explorar Coleção</a>
+            </div>
+        </section>
+
+        <section id="products">
+            <div class="container">
+                <h2 class="section-title fade-in">Coleção Exclusiva</h2>
+                <p class="section-subtitle fade-in">Peças desenhadas para revelar a sua melhor versão.</p>
+                <div id="product-grid" class="product-grid">
+                    </div>
+            </div>
+        </section>
+
+        <section id="admin-panel" class="hidden">
+            <div class="container">
+                <h2 class="section-title fade-in">Gerenciar Produtos</h2>
+                <p class="section-subtitle fade-in">Adicione, edite ou remova peças da sua coleção com facilidade.</p>
+                <div class="admin-form-container fade-in">
+                    <form id="product-form">
+                        <div class="form-group">
+                            <input type="text" id="product-name" placeholder="Nome do Produto" required>
+                        </div>
+                        <div class="form-group">
+                            <input type="number" id="product-price" placeholder="Preço (Ex: 99.90)" step="0.01" required>
+                        </div>
+                        <div class="form-group">
+                            <textarea id="product-description" placeholder="Descrição da peça" rows="4" required></textarea>
+                        </div>
+                        <div class="form-group">
+                            <input type="url" id="product-image" placeholder="URL da Imagem" required>
+                        </div>
+                        <div class="form-group">
+                            <textarea id="product-variants" placeholder="Opções de tamanhos e estampas (Ex: P: Floral, Listrada)" rows="4"></textarea>
+                            <small class="form-hint">Informe uma opção por linha no formato <strong>Tamanho: Estampa 1, Estampa 2</strong>.</small>
+                        </div>
+                        <button type="submit" class="cta-button">Salvar Produto</button>
+                    </form>
+                </div>
+            </div>
+        </section>
+
+        <section id="testimonials">
+            <div class="container">
+                 <div id="testimonial-carousel" class="testimonial-carousel">
+                    </div>
+            </div>
+        </section>
+
+    </main>
+
+    <div id="edit-modal" class="modal-overlay">
+        <div class="modal-content">
+            <h2>Editar Produto</h2>
+            <form id="edit-product-form">
+                <input type="hidden" id="edit-product-id">
+                <div class="form-group">
+                    <input type="text" id="edit-product-name" placeholder="Nome do Produto" required>
+                </div>
+                <div class="form-group">
+                    <input type="number" id="edit-product-price" placeholder="Preço" step="0.01" required>
+                </div>
+                <div class="form-group">
+                    <textarea id="edit-product-description" placeholder="Descrição" rows="4" required></textarea>
+                </div>
+                <div class="form-group">
+                    <input type="url" id="edit-product-image" placeholder="URL da Imagem" required>
+                </div>
+                <div class="form-group">
+                    <textarea id="edit-product-variants" placeholder="Opções de tamanhos e estampas" rows="4"></textarea>
+                    <small class="form-hint">Use o formato <strong>Tamanho: Estampa 1, Estampa 2</strong> em cada linha.</small>
+                </div>
+                <div class="modal-actions">
+                     <button type="button" id="btn-cancel-edit" class="cta-button btn-cancel">Cancelar</button>
+                     <button type="submit" class="cta-button">Salvar Alterações</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <div id="auth-modal" class="modal-overlay">
+        <div class="modal-content">
+            <div class="auth-tabs">
+                <button class="tab-link active" data-tab="login-tab">Entrar</button>
+                <button class="tab-link" data-tab="signup-tab">Criar Conta</button>
+            </div>
+
+            <div id="login-tab" class="tab-content active">
+                <h2>Acesse sua conta</h2>
+                <form id="login-form">
+                    <div class="form-group">
+                        <input type="email" id="login-email" placeholder="Seu e-mail" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="login-password" placeholder="Sua senha" required>
+                    </div>
+                    <button type="submit" class="cta-button">Entrar</button>
+                </form>
+            </div>
+
+            <div id="signup-tab" class="tab-content">
+                <h2>Crie sua conta</h2>
+                <form id="signup-form">
+                    <div class="form-group">
+                        <input type="email" id="signup-email" placeholder="Seu e-mail" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="password" id="signup-password" placeholder="Crie uma senha" required>
+                    </div>
+                    <button type="submit" class="cta-button">Criar Conta</button>
+                </form>
+            </div>
+            <p id="auth-error" class="auth-error-message hidden"></p>
+        </div>
+    </div>
+
+
+    <footer id="footer" class="main-footer">
+        <div class="container">
+            <div class="social-links">
+                <a href="https://www.instagram.com/arenzamodaintima/" aria-label="Instagram" target="_blank" rel="noopener noreferrer">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"></rect><path d="M16 11.37A4 4 0 1 1 12.63 8 4 4 0 0 1 16 11.37z"></path><line x1="17.5" y1="6.5" x2="17.51" y2="6.5"></line></svg>
+                </a>
+                <a href="https://wa.me/5549998267351" aria-label="WhatsApp" target="_blank" rel="noopener noreferrer">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.031-.967-.273-.099-.472-.148-.672.149s-.773.967-.947 1.167c-.173.199-.347.223-.644.074-.297-.149-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.298-.018-.459.13-.608.134-.133.298-.347.446-.52.149-.173.198-.298.298-.497.099-.198.05-.372-.025-.521-.074-.149-.672-1.611-.921-2.207-.242-.579-.487-.5-.672-.51-.173-.009-.372-.011-.571-.011-.198 0-.52.074-.793.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.099 3.2 5.076 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.571-.347zM12.004 2C6.803 2 2.5 6.303 2.5 11.504c0 2.036.532 3.911 1.547 5.582L2 22l5.074-1.988c1.617.884 3.44 1.349 5.33 1.349h.002c5.201 0 9.504-4.303 9.504-9.504C21.91 6.303 17.207 2 12.004 2z" />
+                    </svg>
+                </a>
+                <a href="#" aria-label="Pinterest">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2C6.477 2 2 6.477 2 12c0 4.237 2.636 7.855 6.356 9.312-.084-.336-.14-1.042.028-1.53.184-1.29.98-4.16 1.14-4.78.168-.642.105-1.02-.18-1.548-1.536-1.14-2.28-3.32-2.28-4.732 0-3.153 2.3-5.514 5.186-5.514 2.553 0 4.004 1.914 4.004 4.225 0 2.583-1.64 4.54-3.69 4.54-.99 0-1.74-.774-1.5-1.71.282-1.083.843-2.254.996-2.86.192-.776.75-1.41.09-1.41-1.01 0-1.78.984-1.78 2.296 0 .89.333 1.49.743 1.874.12.114.13.215.09.384-.06.27-.18.72-.24.96-.084.342-.3.45-.58.342-1.28-.512-2.07-2.04-2.07-3.414 0-2.614 2.04-5.064 5.68-5.064 3.257 0 5.48 2.33 5.48 5.178 0 3.29-2.06 5.908-4.99 5.908-.94 0-1.85-.484-2.15-1.042l-.6 2.296c-.306 1.156-1.14 2.65-1.73 3.454.71.223 1.45.345 2.22.345 5.523 0 10-4.477 10-10S17.523 2 12 2z"></path></svg>
+                </a>
+                <a href="#" aria-label="TikTok">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16.5 6.5a4.5 4.5 0 1 1-9 0 4.5 4.5 0 0 1 9 0Z"></path><path d="M16.5 6.5v10c0 .8-.7 1.5-1.5 1.5h-1a1.5 1.5 0 0 1-1.5-1.5V11a3 3 0 0 0-3-3H2.5"></path></svg>
+                </a>
+            </div>
+            <p>&copy; 2025 Arenza Moda Íntima –-  Desejo e elegância em cada detalhe.</p>
+        </div>
+    </footer>
+
+    <script src="app.js"></script>
+</body>
+</html>
